@@ -1,0 +1,38 @@
+
+public class MLP {
+	
+	int[] MLP_struct;
+	double[][][] weight;	// layer, maxnode, maxnode
+	int maxNode = 0;
+	
+	public MLP(int[] MLP_struct) {
+		this.MLP_struct = MLP_struct;
+		int allNode = 0; 
+		for (int struc : MLP_struct) {
+			if (maxNode < struc)
+				maxNode = struc;
+			allNode += struc;
+		}
+		weight = new double[MLP_struct.length-1][maxNode][maxNode];
+	}
+	
+	public void setWeightFromChromosome(Chromosome chromosome) {
+		int g = 0;
+		for (int l = 0;l < MLP_struct.length-1;l++) {
+			for (int n1 = 0;n1 < MLP_struct[l];n1++) {
+				for (int n2 = 0;n2 < MLP_struct[l+1];n2++) {
+					weight[l][n1][n2] = chromosome.gene[g];
+					g++;
+				}
+			}
+		}
+	}
+	
+	public Double computeForward(Double[] data) {
+		Double[][] y = new Double[MLP_struct.length][maxNode];	// layer, node
+		y[0] = data;
+		for (int L = 1;L < MLP_struct.length-1;L++) {}
+		
+		return 0.0;
+	}
+}

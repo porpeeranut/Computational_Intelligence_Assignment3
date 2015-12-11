@@ -1,0 +1,13 @@
+{
+  "C:\\Program Files (x86)\\Java\\jre1.8.0_60\\lib\\rt.jar": {
+    "coordinate": "jre:jre:zip:call:1.0.0",
+    "location": "C:\\Program Files (x86)\\Java\\jre1.8.0_60\\lib\\rt.jar",
+    "status": "RESOLVED",
+    "error": "No class path info available for \u0027C:\\Program Files (x86)\\Java\\jre1.8.0_60\\lib\\rt.jar\u0027. Skipped."
+  },
+  "C:\\Users\\Peeranat\\Google Drive\\CMU\\4th\\semester 1\\261456 Intro to CI\\ComputerAssignment3\\HW3\\src": {
+    "location": "C:\\Users\\Peeranat\\Google Drive\\CMU\\4th\\semester 1\\261456 Intro to CI\\ComputerAssignment3\\HW3\\src",
+    "status": "UNRESOLVED",
+    "error": "No class path info available for \u0027C:\\Users\\Peeranat\\Google Drive\\CMU\\4th\\semester 1\\261456 Intro to CI\\ComputerAssignment3\\HW3\\src\u0027. Skipped."
+  }
+}

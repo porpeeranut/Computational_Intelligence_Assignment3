@@ -1,0 +1,10 @@
+
+public class Chromosome {
+	
+	public Double[] gene;
+	public Double fitness;
+	
+	public Chromosome(Double[] gene) {
+		this.gene = gene;
+	}
+}

@@ -1,0 +1,133 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Random;
+import java.util.Set;
+
+
+public class GA {
+	
+	ArrayList<Chromosome> chromosomeList = new ArrayList<Chromosome>();
+	ArrayList<Double[]> trainingSet;
+	int[] MLP_struct;
+	double wMin = -1.0;
+	double wMax = 1.0;
+	
+	public void initChromosome(int amount, int[] MLP_struct){
+		this.MLP_struct = MLP_struct;
+		int chromoLen = 0;
+		for (int i = 1;i < MLP_struct.length;i++) {
+			chromoLen += MLP_struct[i-1]*MLP_struct[i];
+		}
+		for (int a = 0;a < amount;a++) {
+			Double[] gene = new Double[chromoLen];
+			for (int g = 0;g < gene.length;g++) {
+				gene[g] = wMin + (wMax - wMin)*new Random().nextDouble();
+			}
+			chromosomeList.add(new Chromosome(gene));
+		}
+	}
+	
+	public void train(int maxGeneration, ArrayList<Double[]> trainingSet){
+		this.trainingSet = trainingSet;
+		for (int g = 0;g < maxGeneration;g++) {
+			computeFitnessInList(chromosomeList);
+			ArrayList<Chromosome> selected = randomSelect((int) (chromosomeList.size()*0.8));
+			ArrayList<Chromosome> crossed = crossover(selected, (int) (selected.size()*0.9));
+			ArrayList<Chromosome> pool = (ArrayList<Chromosome>) chromosomeList.clone();
+			pool.addAll(crossed);
+			pool = mutate(pool, (int) (pool.size()*0.7));
+			Collections.sort(pool, new Comparator<Chromosome>() {
+		        public int compare(Chromosome c1, Chromosome c2) {
+		            return (int) (c2.fitness - c1.fitness);
+		        }
+		    });
+			chromosomeList = new ArrayList<Chromosome>(pool.subList(0, chromosomeList.size()));
+			//chromosomeList = mutate(chromosomeList, (int) (chromosomeList.size()*0.7));
+		}
+		
+		Collections.sort(chromosomeList, new Comparator<Chromosome>() {
+	        public int compare(Chromosome c1, Chromosome c2) {
+	            return (int) (c2.fitness - c1.fitness);
+	        }
+	    });
+		for (Chromosome chromosome : chromosomeList) {
+			System.out.println(chromosome.fitness+" "+(chromosome.fitness*100/569));
+		}
+	}
+	
+	private void computeFitnessInList(ArrayList<Chromosome> chromosomeList) {
+		for (Chromosome chromosome : chromosomeList) {
+			computeFitness(chromosome);
+		}
+	}
+	
+	private void computeFitness(Chromosome chromosome) {
+		MLP mlp = new MLP(MLP_struct);
+		mlp.setWeightFromChromosome(chromosome);
+		chromosome.fitness = 0.0;
+		for (Double[] data : trainingSet) {
+			if (mlp.computeForward(data))
+				chromosome.fitness += 1;
+		}
+	}
+
+	private ArrayList<Chromosome> randomSelect(int amount) {
+		ArrayList<Chromosome> selected = new ArrayList<Chromosome>();
+		for (int a = 0;a < amount;a++) {
+			int i = new Random().nextInt(chromosomeList.size());
+			selected.add(chromosomeList.get(i));
+		}
+		return selected;
+	}
+
+	private ArrayList<Chromosome> crossover(ArrayList<Chromosome> selected, int amount) {
+		ArrayList<Chromosome> crossed = new ArrayList<Chromosome>();
+		for (int a = 0;a < amount;a++) {
+			int i1 = new Random().nextInt(selected.size());
+			int i2 = new Random().nextInt(selected.size());
+			Chromosome daddy = selected.get(i1);
+			Chromosome mommy = selected.get(i2);
+			int chromosomeLen = selected.get(0).gene.length;
+			int helfLen = chromosomeLen/2;
+			Double[] gene = new Double[chromosomeLen];
+			for (int i = 0;i < helfLen;i++) {
+				gene[i] = daddy.gene[i];
+			}
+			for (int i = helfLen;i < chromosomeLen;i++) {
+				gene[i] = mommy.gene[i];
+			}
+			crossed.add(new Chromosome(gene));
+		}
+		computeFitnessInList(crossed);
+		return crossed;
+	}
+	
+	private ArrayList<Chromosome> mutate(ArrayList<Chromosome> pool, int amount) {
+		ArrayList<Chromosome> mutated = new ArrayList<Chromosome>();
+		Random rng = new Random();
+		Set<Integer> index = new LinkedHashSet<Integer>();
+		while (index.size() < amount)
+		{
+			//	random index
+		    Integer next = rng.nextInt(pool.size());
+		    index.add(next);
+		}
+		for (int i : index) {
+			Double[] gene = pool.get(i).gene;
+			int mutateRate = (int) (pool.get(i).gene.length * 0.7);
+			for (int m = 0;m < mutateRate;m++) {
+				Integer w = rng.nextInt(pool.get(i).gene.length);
+				gene[w] += wMin + (wMax - wMin)*new Random().nextDouble();
+				if (gene[w] > wMax)
+					gene[w] = wMax;
+				if (gene[w] < wMin)
+					gene[w] = wMin;	
+			}
+			mutated.add(new Chromosome(gene));
+			computeFitness(mutated.get(i));
+		}
+		return mutated;
+	}
+}

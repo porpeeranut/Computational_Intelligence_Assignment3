@@ -1,0 +1,60 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class main {
+
+	public static void main(String[] args) {
+		String path = "C:\\Users\\Peeranat\\Google Drive\\CMU\\4th\\semester 1\\261456 Intro to CI\\ComputerAssignment3\\wdbc.data.txt";
+		File file = new File(path);
+		// feature 0-29, output 30
+		ArrayList<Double[]> trainingSet = new ArrayList<Double[]>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line;
+			int i = 0;
+			while ((line = br.readLine()) != null) {
+				//System.out.println(line);
+				String[] data = line.split(",");
+				Double[] feature = new Double[31];
+				if (data[1].equals("M"))
+					feature[30] = 0.0;
+				else
+					feature[30] = 1.0;
+				for (int j = 2;j < data.length;j++) {
+					feature[j-2] = Double.parseDouble(data[j]);
+					//System.out.print(" "+feature[j-2]);
+				}
+				trainingSet.add(feature);
+				/*if (i++ == 20)
+					break;*/
+			}
+			Collections.shuffle(trainingSet);
+			System.out.println(trainingSet.size());
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		GA ga = new GA();
+		//int[] MLP_struct = {30,40,20,2};
+		//int[] MLP_struct = {30,20,10,2};
+		int[] MLP_struct = {30,15,7,2};
+		//int[] MLP_struct = {30,10,5,2};
+		ga.initChromosome(50, MLP_struct);
+		double eav = 0;
+		for (int c = 0;c < 10;c++) {
+			System.out.println("Fold: "+c);
+			int i = (int) (c*trainingSet.size()*0.1);
+			ArrayList<Double[]> test = new ArrayList<Double[]>(trainingSet.subList(i, (int) (i+(trainingSet.size()*0.1))));
+			ArrayList<Double[]> train = (ArrayList<Double[]>) trainingSet.clone();
+			train.subList(i, (int) (i+(train.size()*0.1))).clear();
+			ga.train(50, (ArrayList<Double[]>) train);
+			eav += ga.test(test);
+		}
+		System.out.println("Error average: "+eav/10);
+	}
+}
